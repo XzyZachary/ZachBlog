@@ -3,7 +3,7 @@ import '@/css/prism.css'
 import 'katex/dist/katex.css'
 // import '@/css/docsearch.css' // Uncomment if using algolia docsearch
 // import '@docsearch/css' // Uncomment if using algolia docsearch
-
+import '@/css/extra.css'
 import { ThemeProvider } from 'next-themes'
 import type { AppProps } from 'next/app'
 import Head from 'next/head'

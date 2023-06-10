@@ -26,6 +26,8 @@
     "next-contentlayer": "0.3.0",
     "next-themes": "^0.2.0",
     "pliny": "0.0.10",
+    "motion":"10.16.2",
+    "swr":"2.1.5",
     "postcss": "^8.4.16",
     "react": "18.2.0",
     "react-dom": "18.2.0",
@@ -38,6 +40,8 @@
     "rehype-slug": "^5.0.0",
     "remark": "^14.0.2",
     "remark-gfm": "^3.0.1",
+    "typewriter-effect":"2.20.1",
+    "react-rough-notation":"1.0.5",
     "remark-math": "^5.1.1",
     "tailwindcss": "^3.2.2",
     "unist-util-visit": "^4.1.0"
