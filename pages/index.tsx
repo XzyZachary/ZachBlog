@@ -76,7 +76,7 @@ export default function Home({ posts }: InferGetStaticPropsType<typeof getStatic
                 color="#DE1D8D"
                 animationDelay={1000}
                 animationDuration={2500}
-                className="text-slate-200"
+                // className="text-slate-200"
               >
                 thoughts, reflections & everything&nbsp;
               </RoughNotation>
