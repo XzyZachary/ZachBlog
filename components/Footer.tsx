@@ -26,7 +26,7 @@ export default function Footer() {
           </div>
           <div className="mx-1">
             <Link href="/contact" className="link-underline">
-              Contact
+              Contact me
             </Link>
           </div>
         </div>
