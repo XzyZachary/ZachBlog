@@ -3,6 +3,8 @@ import type { Authors } from 'contentlayer/generated'
 import SocialIcon from '@/components/social-icons'
 import Image from '@/components/Image'
 import { PageSEO } from '@/components/SEO'
+import Link from '@/components/Link'
+import { RoughNotation } from 'react-rough-notation'
 
 interface Props {
   children: ReactNode
@@ -10,7 +12,7 @@ interface Props {
 }
 
 export default function AuthorLayout({ children, content }: Props) {
-  const { name, avatar, occupation, company, email, twitter, linkedin, github } = content
+  const { name, avatar, occupation, company, email, twitter, linkedin, github, text1 } = content
 
   return (
     <>
@@ -40,7 +42,31 @@ export default function AuthorLayout({ children, content }: Props) {
               <SocialIcon kind="twitter" href={twitter} />
             </div>
           </div>
-          <div className="prose max-w-none pb-8 pt-8 dark:prose-dark xl:col-span-2">{children}</div>
+          <div className="prose max-w-none pb-8 pt-8 dark:prose-dark xl:col-span-2">
+            <p>
+              <RoughNotation
+                type="bracket"
+                brackets={['left', 'right']}
+                show={true}
+                color="#FF0000"
+                animationDelay={300}
+                animationDuration={3000}
+              >
+                {text1}
+              </RoughNotation>
+            </p>
+            <br />
+            <p>
+              This is what I am doing right{' '}
+              <Link
+                href={'/projects'}
+                className="special-underline no-underline hover:text-gray-100 dark:text-gray-100 hover:dark:text-gray-100"
+              >
+                now
+              </Link>
+            </p>
+            <br />
+          </div>
         </div>
       </div>
     </>
