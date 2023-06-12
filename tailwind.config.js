@@ -79,6 +79,14 @@ module.exports = {
         twitter: '#1da1f2',
         facebook: '#1877f2',
       },
+      width: {
+        4.5: '1.125rem',
+        5.5: '1.375rem',
+      },
+      height: {
+        4.5: '1.125rem',
+        5.5: '1.375rem',
+      },
       typography: (theme) => ({
         DEFAULT: {
           css: {

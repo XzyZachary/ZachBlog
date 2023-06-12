@@ -2,7 +2,10 @@
 import React from 'react'
 import { MDXLayout, ComponentMap } from 'pliny/mdx-components'
 import { TOCInline } from 'pliny/ui/TOCInline'
+import { getMDXComponent } from 'mdx-bundler/client'
+import { useMemo } from 'react'
 import { Pre } from 'pliny/ui/Pre'
+import type { MdxLayoutRendererProps } from '@/types'
 import { BlogNewsletterForm } from 'pliny/ui/NewsletterForm'
 
 import Image from './Image'
@@ -20,4 +23,9 @@ export const MDXComponents: ComponentMap = {
   pre: Pre,
   wrapper: Wrapper,
   BlogNewsletterForm,
+}
+
+export function MDXLayoutRenderer({ layout, mdxSource, ...rest }: MdxLayoutRendererProps) {
+  const MDXLayout = useMemo(() => getMDXComponent(mdxSource), [mdxSource])
+  return <MDXLayout layout={layout} components={MDXComponents} {...rest} />
 }
