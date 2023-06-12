@@ -1,26 +1,23 @@
-import { Inter } from '@next/font/google'
-import SectionContainer from './SectionContainer'
+import { MAIN_CONTENT_MIN_HEIGHT } from '@/constant'
+import { MobileNav } from './MobileNav'
+import { useState } from 'react'
 import Footer from './Footer'
-import { ReactNode } from 'react'
 import Header from './Header'
 
-interface Props {
-  children: ReactNode
-}
-
-const inter = Inter({
-  subsets: ['latin'],
-})
-
-const LayoutWrapper = ({ children }: Props) => {
+const LayoutWrapper = ({ children }) => {
+  const [navShow, setNavShow] = useState(false)
+  const onToggleNav = () => setNavShow((status) => !status)
   return (
-    <SectionContainer>
-      <div className={`${inter.className} flex h-screen flex-col justify-between`}>
-        <Header />
-        <main className="mb-auto">{children}</main>
-        <Footer />
+    <>
+      <MobileNav navShow={navShow} onToggleNav={onToggleNav} />
+      <Header onToggleNav={onToggleNav} />
+      <div className="mx-auto max-w-3xl px-3 sm:px-6 xl:max-w-5xl xl:px-0">
+        <div className="flex flex-col justify-between">
+          <main style={{ minHeight: MAIN_CONTENT_MIN_HEIGHT }}>{children}</main>
+          <Footer />
+        </div>
       </div>
-    </SectionContainer>
+    </>
   )
 }
 

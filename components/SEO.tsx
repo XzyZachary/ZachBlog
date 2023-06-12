@@ -23,7 +23,6 @@ const CommonSEO = ({
   ogType,
   ogImage,
   twImage,
-  canonicalUrl,
 }: CommonSEOProps) => {
   const router = useRouter()
   return (
@@ -46,10 +45,6 @@ const CommonSEO = ({
       <meta name="twitter:title" content={title} />
       <meta name="twitter:description" content={description} />
       <meta name="twitter:image" content={twImage} />
-      <link
-        rel="canonical"
-        href={canonicalUrl ? canonicalUrl : `${siteMetadata.siteUrl}${router.asPath}`}
-      />
     </Head>
   )
 }

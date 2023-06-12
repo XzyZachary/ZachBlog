@@ -28,7 +28,7 @@ module.exports = {
         14: '3.5rem',
       },
       fontFamily: {
-        sans: ['Inter', ...fontFamily.sans],
+        sans: ['Outfit', ...fontFamily.sans],
       },
       colors: {
         primary: {
@@ -65,8 +65,19 @@ module.exports = {
           900: '#6A0568',
         },
         'background-color': '#000',
-        green: colors.emerald,
-        gray: colors.neutral,
+        gray: colors.gray,
+        dark: '#22272e',
+        code: {
+          green: '#b5f4a5',
+          yellow: '#ffe484',
+          purple: '#d9a9ff',
+          red: '#ff8383',
+          blue: '#93ddfd',
+          white: '#fff',
+        },
+        spotify: '#1DB954',
+        twitter: '#1da1f2',
+        facebook: '#1877f2',
       },
       typography: (theme) => ({
         DEFAULT: {
@@ -74,9 +85,6 @@ module.exports = {
             color: theme('colors.gray.700'),
             a: {
               color: theme('colors.primary.500'),
-              '&:hover': {
-                color: `${theme('colors.primary.600')} !important`,
-              },
               code: { color: theme('colors.primary.400') },
             },
             h1: {

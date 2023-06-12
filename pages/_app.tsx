@@ -1,5 +1,6 @@
 import '@/css/tailwind.css'
 import '@/css/prism.css'
+import '@/css/twemoji.css'
 import 'katex/dist/katex.css'
 // import '@/css/docsearch.css' // Uncomment if using algolia docsearch
 // import '@docsearch/css' // Uncomment if using algolia docsearch
@@ -21,9 +22,9 @@ export default function App({ Component, pageProps }: AppProps) {
       </Head>
       <Analytics analyticsConfig={siteMetadata.analytics} />
       <LayoutWrapper>
-        <SearchProvider searchConfig={siteMetadata.search}>
+        {/* <SearchProvider searchConfig={siteMetadata.search}> */}
           <Component {...pageProps} />
-        </SearchProvider>
+        {/* </SearchProvider> */}
       </LayoutWrapper>
     </ThemeProvider>
   )
