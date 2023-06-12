@@ -95,7 +95,7 @@ export function ProfileCardInfo() {
               className="hover:underline"
               data-umami-event="profile-card-github"
             >
-              gh/{siteMetadata.github}
+              gh/{siteMetadata.socialAccounts.github}
             </a>
           </p>
         </div>

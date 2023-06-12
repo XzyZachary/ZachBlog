@@ -9,13 +9,13 @@ const siteMetadata = {
   language: 'en-us',
   theme: 'system', // system, dark or light
   fullName: 'Xu Zhiyi',
-  siteUrl: 'https://tailwind-nextjs-starter-blog.vercel.app',
-  siteRepo: 'https://github.com/timlrx/tailwind-nextjs-starter-blog',
+  siteUrl: 'https://zachary-blog.vercel.app/',
+  siteRepo: 'https://github.com/XzyZachary/ZachBlog',
   siteLogo: '/static/images/logo.png',
   image: '/static/images/my.jpg',
   socialBanner: '/static/images/twitter-card.png',
-  email: 'address@yoursite.com',
-  github: 'https://github.com',
+  email: 'xuzacharygo@gmail.com',
+  github: 'https://github.com/XzyZachary',
   twitter: 'https://twitter.com/Twitter',
   facebook: 'https://facebook.com',
   youtube: 'https://youtube.com',
@@ -65,6 +65,9 @@ const siteMetadata = {
       // This corresponds to the `data-lang="en"` in giscus's configurations
       lang: 'en',
     },
+  },
+  socialAccounts: {
+    github: 'Zachary',
   },
   // search: {
   //   provider: 'kbar', // kbar or algolia
