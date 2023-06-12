@@ -8,7 +8,7 @@ export default function Experience({
   text1,
   text2,
   text3,
-}) {
+}: any) {
   return (
     <div className="my-3">
       <div className="flex flex-row text-xl">
