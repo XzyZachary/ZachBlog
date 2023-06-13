@@ -1,11 +1,10 @@
 // @ts-check
 
-/** @type {import("pliny/config").PlinyConfig } */
 const siteMetadata = {
-  title: 'Zachary Xu Blog',
-  author: 'Tails Azimuth',
-  headerTitle: "Zachary's blog",
-  description: 'My personal blog where I share my musings',
+  title: { en: 'Zachary Xu Blog', cn: 'Zachary的博客' },
+  author: { en: 'Xu Zhiyi', cn: '徐志毅' },
+  headerTitle: { en: "Zachary's blog", cn: '徐的博客' },
+  description: { en: "My personal blog where I share my musings", cn: '个人博客' },
   language: 'en-us',
   theme: 'system', // system, dark or light
   fullName: 'Xu Zhiyi',

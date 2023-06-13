@@ -7,22 +7,25 @@ import Experience from '@/components/Experience'
 import experienceData from '@/data/experienceData'
 import Link from '@/components/Link'
 import { RoughNotation } from 'react-rough-notation'
+import useTranslation from 'next-translate/useTranslation'
+import { useRouter } from 'next/router'
 
 interface Props {
   children: ReactNode
-  content: Omit<Authors, '_id' | '_raw' | 'body'>
+  frontMatter: Omit<Authors, '_id' | '_raw' | 'body'>
 }
 
-export default function AuthorLayout({ children, content }: Props) {
-  const { name, avatar, occupation, company, email, twitter, linkedin, github, text1 } = content
-
+export default function AuthorLayout({ frontMatter }: Props) {
+  const { name, avatar, occupation, company, email, twitter, linkedin, github, text1 } = frontMatter
+  const { t } = useTranslation();
+  const router = useRouter();
   return (
     <>
       <PageSEO title={`About - ${name}`} description={`About me - ${name}`} />
       <div className="divide-y divide-gray-200 dark:divide-gray-700">
         <div className="space-y-2 pb-8 pt-6 md:space-y-5">
           <h1 className="text-3xl font-extrabold leading-9 tracking-tight text-gray-900 dark:text-gray-100 sm:text-4xl sm:leading-10 md:text-6xl md:leading-14">
-            About
+            {t("about:1")}
           </h1>
         </div>
         <div className="items-start space-y-2 xl:grid xl:grid-cols-3 xl:gap-x-8 xl:space-y-0">
@@ -59,13 +62,12 @@ export default function AuthorLayout({ children, content }: Props) {
             </p>
             <br />
             <br />
-            <h1>About this site</h1>
+            <h1>{t("about:2")}</h1>
             <p>
-              Welcome to my home on the internet. This site functions as a blog/portfolio, a place
-              to share code and thoughts. Opinions are my own.
+              {t("about:3")}
             </p>
             <div>
-              I learnt how to build this site from the most awesome people in the community:
+              {t("about:4")}:
               <ul>
                 <li>
                   <Link
@@ -87,14 +89,14 @@ export default function AuthorLayout({ children, content }: Props) {
                       </g>
                     </svg>
                   </Link>
-                  : Template starter where I bootstrapped the project.
+                  : {t("about:5")}.
                 </li>
                 <li>
                   <Link
-                    href={'https://www.einargudni.com/'}
+                    href={'https://www.leohuynh.dev/'}
                     className="special-underline no-underline hover:text-gray-100 dark:text-gray-100 hover:dark:text-gray-100"
                   >
-                    Einar Guðjónsson
+                    Leo's Blog
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       viewBox="0 0 24 24"
@@ -109,7 +111,7 @@ export default function AuthorLayout({ children, content }: Props) {
                       </g>
                     </svg>
                   </Link>
-                  : Now page, navigation style, animations and much more.
+                  : {t("about:6")}.
                 </li>
               </ul>
             </div>
@@ -118,11 +120,11 @@ export default function AuthorLayout({ children, content }: Props) {
         <div className="mt-10 md:pl-16">
           <div className="space-y-2 pb-8 pt-6 md:space-y-5">
             <h1 className="text-3xl font-extrabold leading-9 tracking-tight text-gray-900 dark:text-gray-100 sm:text-4xl sm:leading-10 md:text-6xl md:leading-14">
-              Experience
+              {t("about:7")}
             </h1>
           </div>
           <div className="max-w-none pb-8 pt-8 xl:col-span-2">
-            {experienceData.map((d) => {
+            {experienceData[router.locale].map((d) => {
               return <Experience key={d.company} {...d} />
             })}
           </div>

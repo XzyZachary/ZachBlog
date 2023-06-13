@@ -3,6 +3,7 @@ const { withContentlayer } = require('next-contentlayer')
 const withBundleAnalyzer = require('@next/bundle-analyzer')({
   enabled: process.env.ANALYZE === 'true',
 })
+const nextTranslate = require('next-translate-plugin')
 
 // You might need to insert additional domains in script-src if you are using external services
 const ContentSecurityPolicy = `
@@ -59,7 +60,7 @@ const securityHeaders = [
  **/
 module.exports = () => {
   const plugins = [withContentlayer, withBundleAnalyzer]
-  return plugins.reduce((acc, next) => next(acc), {
+  const rest =  plugins.reduce((acc, next) => next(acc), {
     reactStrictMode: true,
     pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
     eslint: {
@@ -82,4 +83,5 @@ module.exports = () => {
       return config
     },
   })
+  return nextTranslate(rest)
 }

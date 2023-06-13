@@ -4,9 +4,17 @@ import Link from './Link'
 import NextImage from 'next/image'
 import { useRouter } from 'next/router'
 import ThemeSwitch from './ThemeSwitch'
-
-const Header = ({ onToggleNav }: { onToggleNav: () => void }) => {
+import useTranslation from 'next-translate/useTranslation'
+const Header = () => {
+  const { t } = useTranslation()
   const router = useRouter()
+  const { locale, locales, defaultLocale } = router
+  console.log(33, locale, locales)
+
+  const changeLanguage = (e) => {
+    const locale = e.target.value
+    router.push(router.asPath, router.asPath, { locale })
+  }
   return (
     <header className="supports-backdrop-blur:bg-white/95 sticky top-0 z-40 overflow-x-hidden bg-white/75 py-3 backdrop-blur dark:bg-dark/75">
       <div className="mx-auto flex max-w-3xl items-center justify-between px-3 xl:max-w-5xl xl:px-0">
@@ -41,28 +49,20 @@ const Header = ({ onToggleNav }: { onToggleNav: () => void }) => {
               )
             })}
           </div>
-
-          <ThemeSwitch />
-          <button
-            className="ml-2 mr-1 h-8 w-8 rounded sm:hidden"
-            type="button"
-            aria-label="Toggle Menu"
-            onClick={onToggleNav}
-            data-umami-event="mobile-nav-toggle"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-              className="text-gray-900 dark:text-gray-100"
+          <select
+              onChange={changeLanguage}
+              defaultValue={locale}
+              style={{ textAlignLast: 'center' }}
+              className="text-shadow-sm bg-transparent text-sm tracking-wide text-gray-900 dark:text-gray-100"
             >
-              <path
-                fillRule="evenodd"
-                d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
-                clipRule="evenodd"
-              />
-            </svg>
-          </button>
+              {locales.map((e) => (
+                <option value={e} key={e}>
+                  {e}
+                </option>
+              ))}
+            </select>
+          <ThemeSwitch />
+          
         </div>
       </div>
     </header>

@@ -5,6 +5,7 @@ import { allCoreContent, sortedBlogPost } from 'pliny/utils/contentlayer'
 import { POSTS_PER_PAGE } from '../index'
 import { InferGetStaticPropsType } from 'next'
 import { allBlogs } from 'contentlayer/generated'
+import { useRouter } from 'next/router'
 import type { Blog } from 'contentlayer/generated'
 
 export const getStaticPaths = async () => {
@@ -49,9 +50,10 @@ export default function PostPage({
   initialDisplayPosts,
   pagination,
 }: InferGetStaticPropsType<typeof getStaticProps>) {
+  const router = useRouter()
   return (
     <>
-      <PageSEO title={siteMetadata.title} description={siteMetadata.description} />
+      <PageSEO title={siteMetadata.title[router.locale]} description={siteMetadata.description[router.locale]} />
       <ListLayout
         posts={posts}
         initialDisplayPosts={initialDisplayPosts}

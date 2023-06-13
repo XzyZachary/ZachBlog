@@ -17,10 +17,24 @@ import { remarkCodeBlockTitle } from './remark-code-block-title'
 import { remarkImgToJsx } from './remark-img-to-jsx'
 import { remarkTocHeading } from './remark-toc-heading'
 
-export async function getFileBySlug(type: string, slug: string): Promise<MdxFileData> {
+
+const root = process.cwd()
+
+export function getFiles(type, otherLocale = '') {
+  const prefixPaths = path.join(root, 'data', type)
+  const files =
+    otherLocale === ''
+      ? getAllFilesRecursively(prefixPaths).filter((path) => (path.match(/\./g) || []).length === 1)
+      : getAllFilesRecursively(prefixPaths).filter((path) => path.includes(`.${otherLocale}.md`))
+
+  // Only want to return blog/path and ignore root, replace is needed to work on Windows
+  return files.map((file) => file.slice(prefixPaths.length + 1).replace(/\\/g, '/'))
+}
+
+export async function getFileBySlug(type: string, slug: string,  otherLocale = ''): Promise<MdxFileData> {
   const root = process.cwd()
-  const mdxPath = path.join(root, 'data', type, `${slug}.mdx`)
-  const mdPath = path.join(root, 'data', type, `${slug}.md`)
+  const mdxPath = otherLocale == '' ? path.join(root, 'data', type, `${slug}.mdx`) : path.join(root, 'data', type, `${slug}.${otherLocale}.mdx`);
+  const mdPath = otherLocale == '' ? path.join(root, 'data', type, `${slug}.md`) : path.join(root, 'data', type, `${slug}.${otherLocale}.md`);
   const source = fs.existsSync(mdxPath)
     ? fs.readFileSync(mdxPath, 'utf8')
     : fs.readFileSync(mdPath, 'utf8')
@@ -103,10 +117,13 @@ export async function getFileBySlug(type: string, slug: string): Promise<MdxFile
   }
 }
 
-export function getAllFilesFrontMatter(folder: string) {
+export function getAllFilesFrontMatter(folder: string, otherLocale) {
   const root = process.cwd()
   const prefixPaths = path.join(root, 'data', folder)
-  const files = getAllFilesRecursively(prefixPaths)
+  const files =
+    otherLocale === ''
+      ? getAllFilesRecursively(prefixPaths).filter((path) => (path.match(/\./g) || []).length === 1)
+      : getAllFilesRecursively(prefixPaths).filter((path) => path.includes(`.${otherLocale}.md`))
   const allFrontMatter: BlogFrontMatter[] = []
 
   files.forEach((file) => {

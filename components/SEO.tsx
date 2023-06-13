@@ -3,6 +3,7 @@ import { useRouter } from 'next/router'
 import siteMetadata from '@/data/siteMetadata'
 import { CoreContent } from 'pliny/utils/contentlayer'
 import type { Blog, Authors } from 'contentlayer/generated'
+
 interface CommonSEOProps {
   title: string
   description: string
@@ -32,7 +33,7 @@ const CommonSEO = ({
       <meta name="description" content={description} />
       <meta property="og:url" content={`${siteMetadata.siteUrl}${router.asPath}`} />
       <meta property="og:type" content={ogType} />
-      <meta property="og:site_name" content={siteMetadata.title} />
+      <meta property="og:site_name" content={siteMetadata.title[router.locale]} />
       <meta property="og:description" content={description} />
       <meta property="og:title" content={title} />
       {Array.isArray(ogImage) ? (
@@ -108,6 +109,7 @@ export const BlogSEO = ({
   images = [],
   canonicalUrl,
 }: BlogSeoProps) => {
+  const router = useRouter()
   const publishedAt = new Date(date).toISOString()
   const modifiedAt = new Date(lastmod || date).toISOString()
   const imagesArr =
@@ -135,7 +137,7 @@ export const BlogSEO = ({
   } else {
     authorList = {
       '@type': 'Person',
-      name: siteMetadata.author,
+      name: siteMetadata.author[router.locale],
     }
   }
 
@@ -153,7 +155,7 @@ export const BlogSEO = ({
     author: authorList,
     publisher: {
       '@type': 'Organization',
-      name: siteMetadata.author,
+      name: siteMetadata.author[router.locale],
       logo: {
         '@type': 'ImageObject',
         url: `${siteMetadata.siteUrl}${siteMetadata.siteLogo}`,

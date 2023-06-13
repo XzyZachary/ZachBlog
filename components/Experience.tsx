@@ -8,6 +8,7 @@ export default function Experience({
   text1,
   text2,
   text3,
+  text4,
 }: any) {
   return (
     <div className="my-3">
@@ -34,6 +35,12 @@ export default function Experience({
           <div>
             <span className="mr-2 text-lg text-primary-color-500">&#8227;</span>
             <span className="text-gray-500 dark:text-gray-400">{text3}</span>
+          </div>
+        )}
+        {text4 && (
+          <div>
+            <span className="mr-2 text-lg text-primary-color-500">&#8227;</span>
+            <span className="text-gray-500 dark:text-gray-400">{text4}</span>
           </div>
         )}
       </div>

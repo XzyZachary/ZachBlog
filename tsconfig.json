@@ -34,6 +34,7 @@
   "include": [
     "next-env.d.ts",
     "**/*.js",
+    "**/*.json",
     "**/*.ts",
     "**/*.tsx",
     ".contentlayer/generated",

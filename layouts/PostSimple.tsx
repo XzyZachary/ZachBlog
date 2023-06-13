@@ -52,7 +52,7 @@ export default function PostLayout({ content, next, prev, children }: LayoutProp
                 {!loadComments && (
                   <button onClick={() => setLoadComments(true)}>Load Comments</button>
                 )}
-                {loadComments && <Comments commentsConfig={siteMetadata.comments} slug={slug} />}
+                {/* {loadComments && <Comments commentsConfig={siteMetadata.comments} slug={slug} />} */}
               </div>
             )}
             <footer>

@@ -1,0 +1,178 @@
+---
+title: N kinds of schemes for skin replacement
+date: '2021-07-29'
+tags: ['nuxt', 'sass', 'CSS Property']
+draft: false
+summary: Website skinning function
+---
+
+1. CSS  filter
+
+```javascript
+filter: invert(1) hue-rotate(180deg);
+```
+
+Disadvantage: `Indiscriminate color change, some yellow and other colors will conflict.`
+
+2. Generate multiple sets of CSS styles.
+
+Implementation plan: Compile multiple skin CSS styles using compilation and build tools, and dynamically link the corresponding skin styles through JS.
+
+```javascript
+var theme = /\bt=(\w+)/.exec(location.search);
+theme = theme ? theme[1] : "light";
+changeTheme(theme);
+function changeTheme(theme) {
+    var head = document.getElementsByTagName("head")[0];
+    var link = document.createElement("link");
+    link.dataset.type = "theme";
+    link.href = "assets/css/theme-" + theme + "/pages/home/home.css";
+    link.rel = "stylesheet";
+    link.type = "text/css";
+    head.appendChild(link);
+}
+```
+
+3. CSS Property
+
+```javascript
+// variable.scss
+:root {
+  --fill-1: #fff;
+  --text: #3c3c3c;
+  --text-1: #757575;
+  --text-2: #222;
+ 
+  --font-size-large: 18px;
+  --font-size-large-x: 22px;
+  --font-size-medium: 14px;
+  --font-size-medium-x: 16px;
+  --font-size-small-s: 10px;
+  --font-size-small: 12px;
+}
+// 深色变量
+[data-theme="dark"] {
+  --fill-1: #222;
+  --text: #fff;
+  --text-1: rgba(255, 255, 255, 0.3);
+  --text-2: #ffcd32;
+}
+```
+
+Disadvantage: `Compatibility issues.`
+
+4. Sass variables
+
+```javascript
+// variable.scss 
+$colors-light: (
+  fill-1: #fff,
+  text: #3c3c3c,
+  text-1: #757575,
+  text-2: #222,
+);
+ 
+$colors-dark: (
+  fill-1: #222,
+  text: #fff,
+  text-1: rgba(255, 255, 255, 0.3),
+  text-2: #ffcd32,
+);
+
+// mixin.scss
+@mixin bg-color($key) {
+  background-color: map-get($colors-light, $key);
+  [data-theme="dark"] & {
+    background-color: map-get($colors-dark, $key);
+  }
+}
+@mixin text-color($key) {
+  color: map-get($colors-light, $key);
+  [data-theme="dark"] & {
+    color: map-get($colors-dark, $key);
+  }
+}
+ 
+<style lang="scss" rel="stylesheet/scss">
+@import "assets/variable.scss";
+@import "assets/mixin.scss";
+.test-list {
+    .list-title {
+      height: 40px;
+      line-height: 40 px;
+      text-align: center;
+        @include text-color(text-1);
+    }
+}
+</style>
+```
+
+Based on the above options, we ultimately decided to adopt the third option, but we need to compatible with browsers above IE 10.
+So Handle compatibility of course requires polyfills.
+
+The solution for SPA projects is relatively simple.
+
+```javascript
+// themes.js
+import 'mutationobserver-shim';
+import cssVars from 'css-vars-ponyfill';
+ 
+ 
+const createLink = (() => {
+  let $link = null;
+  return () => {
+    if ($link) {
+      return $link;
+    }
+    $link = document.createElement('link');
+    $link.id = 'dxxx';
+    $link.rel = 'stylesheet';
+    $link.type = 'text/css';
+    document.querySelector('head').appendChild($link);
+    return $link;
+  };
+})();
+ 
+/**
+ * Change theme
+ * @param {string} theme - theme name, default
+ * @return {string} theme name
+ */
+const toggleTheme = (theme = 'default') => {
+  const $link = createLink();
+  $link.href = `https://xxxx/theme/test.css`;
+  cssVars({
+    watch: false
+  });
+  setTimeout(function() {
+    cssVars({
+      watch: true
+    });
+  }, 0);
+  return theme;
+};
+ 
+export default toggleTheme;
+```
+
+What makes ```Nuxt``` special is its server-side rendering, and the solution mentioned above cannot be used for it.
+
+As it replaces CSS after the client-side rendering. 
+
+However, this technique cannot be applied to server-side rendering as it may lead to a gap period.
+
+
+After searching through various documents, I focused my attention on PostCSS, a tool that transpiles CSS code using JavaScript plugins.
+
+```javascript
+import axios from 'axios';
+export default async function () {
+    const _rest = await axios.get('https://xxxx/xzytest.json');
+    this.nuxt.options.build.postcss.plugins['postcss-css-variables'] = {
+        variables: _rest.data
+    };
+};
+```
+
+Notes:
+```postcss-css-variables requires PostCSS 8.```

@@ -9,8 +9,10 @@ import { Greeting } from '@/components/homepage/Greeting'
 import Heading from '@/components/homepage/Heading'
 import ProfileCard from '@/components/ProfileCard'
 import { allBlogs } from 'contentlayer/generated'
+import { useRouter } from 'next/router'
 import { FeaturedPosts } from '@/components/homepage/FeaturedPosts'
 import type { Blog } from 'contentlayer/generated'
+import useTranslation from 'next-translate/useTranslation'
 
 
 export const getStaticProps = async () => {
@@ -20,9 +22,11 @@ export const getStaticProps = async () => {
 }
 
 export default function Home({ posts }: InferGetStaticPropsType<typeof getStaticProps>) {
+  const router = useRouter()
+  const { t } =  useTranslation()
   return (
     <>
-      <PageSEO title={siteMetadata.title} description={siteMetadata.description} />
+      <PageSEO title={siteMetadata.title[router.locale]} description={siteMetadata.description[router.locale]} />
       <div className="mt-8 divide-y divide-gray-200 dark:divide-gray-700 md:mt-16">
         <div className="space-y-2 md:my-4 md:space-y-5 md:pb-8 md:pt-6 xl:grid xl:grid-cols-3">
           <div className="md:pr-8 xl:col-span-2">
@@ -33,7 +37,7 @@ export default function Home({ posts }: InferGetStaticPropsType<typeof getStatic
               <ShortDescription />
               <BlogLinks />
               <p className="my-8 flex">
-                <span className="mr-2">Happy reading</span>
+                <span className="mr-2">{t('common:31')}</span>
                 {/* <Twemoji emoji="clinking-beer-mugs" /> */}
               </p>
             </div>

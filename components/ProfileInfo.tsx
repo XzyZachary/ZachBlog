@@ -1,10 +1,15 @@
 import siteMetadata from '@/data/siteMetadata'
+import useTranslation from 'next-translate/useTranslation'
+import { useRouter } from 'next/router';
+
 
 export function ProfileCardInfo() {
+  const { t } = useTranslation();
+  const router = useRouter();
   return (
     <div className="hidden py-4 xl:block xl:px-6">
-      <h3 className="text-xl font-semibold text-gray-800 dark:text-white">Xu Zhiyi(Zachary)</h3>
-      <h5 className="py-2 text-gray-700 dark:text-gray-400">Learner | Builder</h5>
+      <h3 className="text-xl font-semibold text-gray-800 dark:text-white">{siteMetadata.author[router.locale]}(Zachary)</h3>
+      <h5 className="py-2 text-gray-700 dark:text-gray-400">{t('common:32')}</h5>
       <div className="mb-2 mt-4 space-y-4">
         <div className="flex items-center text-gray-700 dark:text-gray-200">
           <svg
@@ -22,7 +27,7 @@ export function ProfileCardInfo() {
             />
           </svg>
 
-          <p className="px-2">Font-End Engineer</p>
+          <p className="px-2">{t('common:17')}</p>
         </div>
         <div className="flex items-center text-gray-700 dark:text-gray-200">
           <svg
@@ -47,7 +52,7 @@ export function ProfileCardInfo() {
           </svg>
 
           <p className="px-2">
-            [::1]:443 - Shanghai
+            [::1]:443 - {t('common:5')}
             <span className="absolute ml-1 inline-flex pt-px">
               {/* <Twemoji emoji="flag-vietnam" /> */}
             </span>
