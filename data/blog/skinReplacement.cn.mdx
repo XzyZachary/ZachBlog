@@ -1,22 +1,24 @@
 ---
-title: N种换肤方案
+title: 换肤的N种方案
 date: '2021-07-29'
 tags: ['nuxt', 'sass', 'CSS Property']
 draft: false
-summary: Website skinning function
+summary: 网站换肤功能
 ---
 
-1. CSS  filter
+1. 简单粗暴CSS filter
 
 ```javascript
 filter: invert(1) hue-rotate(180deg);
 ```
 
-Disadvantage: `Indiscriminate color change, some yellow and other colors will conflict.`
+缺点: `无差别变色，有些黄色等其他颜色会有冲突.`
 
-2. Generate multiple sets of CSS styles.
+2. 生成多套样式css.
 
-Implementation plan: Compile multiple skin CSS styles using compilation and build tools, and dynamically link the corresponding skin styles through JS.
+使用覆盖样式实现与scss变量实现会把多套皮肤的样式都编译到一个css文件里面，如果有多套皮肤样式，这个文件是会非常大的。为了解决这样的问题，就自然的想出了拆分scss的实现：
+
+实现方案，通过编译工具与构建工具编译出多套皮肤css，通过js动态的link对应的皮肤样式
 
 ```javascript
 var theme = /\bt=(\w+)/.exec(location.search);
@@ -59,7 +61,7 @@ function changeTheme(theme) {
 }
 ```
 
-Disadvantage: `Compatibility issues.`
+缺点: `兼容性差.`
 
 4. Sass variables
 
@@ -107,10 +109,11 @@ $colors-dark: (
 </style>
 ```
 
-Based on the above options, we ultimately decided to adopt the third option, but we need to compatible with browsers above IE 10.
-So Handle compatibility of course requires polyfills.
+基于上面的方案，我们最终采取的第三套方案，但是我们处理兼容到IE11.
 
-The solution for SPA projects is relatively simple.
+很显然，处理兼容就需要polyfill
+
+SPA的项目相对比较简单.
 
 ```javascript
 // themes.js
@@ -155,14 +158,13 @@ const toggleTheme = (theme = 'default') => {
 export default toggleTheme;
 ```
 
-What makes ```Nuxt``` special is its server-side rendering, and the solution mentioned above cannot be used for it.
+```Nuxt```特殊在于服务端渲染，上面的解决方案是无法满足的，因为他是在客户端渲染完后替换了css。服务端渲染就不能这么做，这样会有空档期。
 
-As it replaces CSS after the client-side rendering. 
+查询了各个文档，我把目光聚焦在postcss，一个用 JavaScript 工具和插件转换 CSS 代码的工具.
 
-However, this technique cannot be applied to server-side rendering as it may lead to a gap period.
+对应的plugin有postcss-css-variables，这个插件传入variable的话，会在编译的是将页面用到var的地方全部替换成对应的颜色，这样既能规避了兼容，又能实现配置。
 
-
-After searching through various documents, I focused my attention on PostCSS, a tool that transpiles CSS code using JavaScript plugins.
+demo实现完成后，我们就思考如何使他变成调取接口配置，那么粗暴的思路就是，modules里面可以拿到nuxt options包含了nuxt.config.js的所有配置，我们直接强行object挂载
 
 ```javascript
 import axios from 'axios';
@@ -174,5 +176,5 @@ export default async function () {
 };
 ```
 
-Notes:
-```postcss-css-variables requires PostCSS 8.```
+注意点:
+```postcss-css-variables是需要postcss8的.```

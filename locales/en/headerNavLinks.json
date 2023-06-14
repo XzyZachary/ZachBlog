@@ -1,6 +1,7 @@
 {
-  "blog": "Blog",
-  "tags": "Tags",
-  "projects": "Projects",
-  "about": "About"
+  "Blog": "Blog",
+  "Tags": "Tags",
+  "Projects": "Projects",
+  "About": "About",
+  "Resume": "Resume"
 }

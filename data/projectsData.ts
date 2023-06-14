@@ -1,20 +1,32 @@
-const projectsData = [
-  {
-    title: 'A Search Engine',
-    description: `What if you could look up any information in the world? Webpages, images, videos
-    and more. Google has many features to help you find exactly what you're looking
-    for.`,
-    imgSrc: '/static/images/google.png',
-    href: 'https://www.google.com',
-  },
-  {
-    title: 'The Time Machine',
-    description: `Imagine being able to travel back in time or to the future. Simple turn the knob
-    to the desired date and press "Go". No more worrying about lost keys or
-    forgotten headphones with this simple yet affordable solution.`,
-    imgSrc: '/static/images/time-machine.jpg',
-    href: '/blog/the-time-machine',
-  },
-]
+const projectsData =  {
+  en: [
+    {
+      title: 'ChatMate-GPT',
+      description: `ChatMate is a chat application based on Open AI GPT-3. Developed with React Native, supports Android and iOS`,
+      imgSrc: '/static/images/chatmate.jpeg',
+      href: 'https://github.com/XzyZachary/ChatMate-GPT',
+    },
+    {
+      title: 'IndexDB Promise',
+      description: `A lightweight indexdb promise.`,
+      imgSrc: '/static/images/indexdb.png',
+      href: 'https://github.com/XzyZachary/IDB-Promise',
+    },
+  ],
+  cn: [
+    {
+      title: 'ChatMate-GPT',
+      description: `ChatMate 是一个基于 Open AI GPT-3 的聊天应用。使用 React Native 开发，支持 Android 和 iOS。`,
+      imgSrc: '/static/images/chatmate.jpeg',
+      href: 'https://github.com/XzyZachary/ChatMate-GPT',
+    },
+    {
+      title: 'IndexDB Promise',
+      description: `一个轻量级indexdb promise化.`,
+      imgSrc: '/static/images/indexdb.png',
+      href: 'https://github.com/XzyZachary/IDB-Promise',
+    },
+  ]
+}
 
 export default projectsData

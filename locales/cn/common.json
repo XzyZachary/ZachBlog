@@ -30,5 +30,18 @@
   "30": "职业生涯",
   "31": "感谢阅读",
   "32": "一个普通的程序员",
-  "all": "所有帖子"
+  "all": "所有帖子",
+  "nexta": "下一篇",
+  "search": "搜索文章",
+  "comment": "Load Comments",
+  "pub": "发布",
+  "authors": "作者",
+  "name": "名称",
+  "preva": "上一篇",
+  "nextp": "下一章",
+  "prevp": "上一章",
+  "of": "",
+  "github": "查看Github",
+  "tags": "标签",
+  "back": "返回"
 }

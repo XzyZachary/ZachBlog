@@ -30,5 +30,18 @@
   "30": "My career",
   "31": "Happy reading",
   "32": "a normal programmer",
-  "all": "All Posts"
+  "all": "All Posts",
+  "nexta": "Next Article",
+  "preva": "Previous Article",
+  "nextp": "Next",
+  "prevp": "Previous",
+  "of": "of",
+  "back": "Back to the blog",
+  "search": "Search articles",
+  "comment": "Load Comments",
+  "pub": "Published",
+  "github": "View on GitHub",
+  "tags": "Tags",
+  "authors": "Authors",
+  "name": "Name"
 }

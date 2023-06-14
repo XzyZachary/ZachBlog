@@ -1,13 +1,6 @@
 ---
 layout: ResumeLayout
-avatar: /static/images/logo.jpg
-occupation: Software Engineer
-company: Insights Studio
-email: leo@insights.is
-twitter: https://twitter.com/hta218_
-facebook: https://facebook.com/hta218
-linkedin: https://www.linkedin.com
-github: https://github.com/hta218
+authors: ['default']
 ---
 
 ## 徐志毅 (Zachary)
@@ -56,7 +49,7 @@ github: https://github.com/hta218
 - **技术栈**:
   - 前端: Nuxtjs + Vite
   - 后端: Koa.js, JWT, MongoDB
-- **职位**: 全栈开发
+- **职位**: 全栈工程师
 - **职责**:
   - Nuxt + Npm组件库实现预览功能.
   - 使用koa提供generate接口，主要调用nuxt中的generate函数，可以生成文件到指定目录.
@@ -68,95 +61,94 @@ github: https://github.com/hta218
   - 使用低代码思想实现静态页面输出.
 
 <br />
-**Project**: Log Report SDK
+**项目**: 日志埋点上报SDK
 
-- **Description**: SDK for log collection and reporting
-- **Stack**:
+- **描述**: 代码埋点收集用户行为数据的SDK
+- **技术栈**:
   - Monorepo, TypeScript, Rollup
-- **Position**: Frontend Developer
-- **Responsibilities**:
-  - Monorepo architecture design divided into three parts, namely core, tracing, utils package.
-  - Core package is the base class, initialize to obtain server url, encryption key,max cache numbers, send interval time etc.
-  - Tracing package is browser reporting, which inherits the core class. The main functions include log queue cache, delayed reporting, and reporting methods(post, get, image, beacon). Regarding the reporting method, a compatible downgrading process will be adopte.
-  - Utils package is util class. The main functions include encrypt log, determine browser compatibility, obtain basic browser information, etc.
+- **职位**: 前端工程师
+- **职责**:
+  - Monorepo架构设计，主要分为三个包：core, tracing, utils.
+  - Core包主要是一个base类，初始化获得上报接口地址，加密key，最大缓存数，延迟上报时长，发布订阅模式引入插件.
+  - Tracing包主要是浏览器上报，继承了core类，主要是缓存日志上报队列，延迟上报，上报方式（get， post， image，beacon）， 并根据浏览器兼容性进行降级处理.
+  - Utils包主要是工具类，主要加密日志，浏览器兼容性，获取浏览器基础属性合并进日志中等.
 
-- **Accomplishments**:
-  - Good knowledge of develop SDK or component library.
-  - Architecture design and understanding of reporting methods.
+- **成就**:
+  - 开发组件或者sdk的流程以及架构设计.
+  - 熟悉了解各种不同上报方式.
 
 <br />
-**Project**: QiMao Statistics Platform、Infrastructure 、Recommend Management
+**项目**: 统计平台，基础平台，推荐管理后台
 
-- **Description**: Business indicators BI, AB testing, Error Collection and Analysis System, service flow configuration.
-- **Stack**:
+- **描述**: 业务指标BI报表，AB测试，错误日志收集，服务流配置.
+- **技术栈**:
   - Vue2、Vue3、VueX、Antd-Design-Vue、VxeTable、EChart
-- **Position**: Frontend Developer
-- **Responsibilities**:
-  - Responsible for system management refactoring to control multiple project permissions.
-  - Automate indicator display through Echarts and configuration center.
-  - optimize big data list, low-code drag and drop to generate form.
-  - lazy loading to achieve loading speed of business market.
-  - nginx+lua realizes gray release
-  - Encapsulation filter item from , table, pagination components realize data viewing and filtering
+- **职位**: 前端工程师
+- **职责**:
+  - 负责系统管理权限重构.
+  - 根据配置数据和Echart自动化生成业务指标报表.
+  - 优化大数据列表，低代码拖拽生成表单.
+  - nginx+lua实现灰度发布.
+  - 封装了筛选项，表格，分页实现简单筛查表格组件.
 
-- **Accomplishments**:
-  - Good knowledge of utomatic generation of BI reports.
-  - Grayscale release, low-code form.
+- **成就**:
+  - 熟悉自动化图表生成.
+  - 熟悉灰度发布，低代码拖拽表单.
 
 
-### Xsunt
-March 2018 - November 2021
+### 百舜
+2018-03 - 2021-11
 
-**Project**: OneLook3
+**项目**: OneLook3
 
-- **Description**: Dashboard of the sales growth report of the company's products (various drugs), doctor's sales and SWOT analysis.
-- **Stack**:
+- **描述**: 公司产品（各种药品）销售增长报表仪表板，医生销售及SWOT分析.
+- **技术栈**:
   - .Net Core3.0 WebApi、Vue2、ElementUi、HighChart、GoogleMap、PWA、IndexDB
-- **Position**: Fullstack Developer
-- **Responsibilities**:
-  - the display of medical site maps, the development of some reports, the packaging of report components and the display of data configuration.
+- **职位**: 全栈工程师
+- **职责**:
+  - 医疗站点地图的展示，部分报表的开发，报表组件的封装和数据配置的展示.
+  - 使用PWA + IndexDB实现完全离线报表展示网站
 
-- **Accomplishments**:
-  - Refactored the project to use vue.
-  - use PWA + IndexDB to build a completely offline website.
+- **成就**:
+  - 用vue重构了项目.
+  - 用PWA + IndexDB构建了完全离线网站.
 
 <br />
 
-### Shanghai Internet Software Co., Ltd
-September 2016 - March 2018
+### 上海互联网软件有限公司
+2016-07 - 2018-03
 
-**Project**: Government Management information platform
+**项目**: 政府信息管理平台
 
-- **Description**: Portal and declared website.
-- **Stack**:
+- **描述**: 项目构建，业务开发.
+- **技术栈**:
   - C#、JQuery、HTML、CSS
-- **Position**: Fullstack Developer
-- **Responsibilities**:
-  - Platform construction and function development.
+- **职位**: 全栈工程师
+- **职责**:
+  - 平台开发，需求跟进.
 
 
 <br />
 
-## Side Projects
+## 自己玩的项目
 
-- [ChatMate-GPT](https://github.com/XzyZachary/ChatMate-GPT): ChatMate is a chat application based on Open AI GPT-3. Developed with React Native, supports Android and iOS
-- [IndexDB Promise](https://github.com/XzyZachary/IDB-Promise): A lightweight indexdb promise
+- [ChatMate-GPT](https://github.com/XzyZachary/ChatMate-GPT): ChatMate 是一款基于 Open AI GPT-3 的聊天应用程序。使用 React Native 开发，支持 Android 和 iOS， 模仿别人开源的项目。
+- [IndexDB Promise](https://github.com/XzyZachary/IDB-Promise): 一个轻量级indexdb promise化.
 
 
-## Education
+## 教育背景
 
-**Jiangsu Normal University of Computer and Science**
-_Sep 2012 - June 2016_
+**江苏师范大学**
+_2012-09 - 2016-06_
 
-- Major: Software Engineering
-- Degree grade: Good
+- 专业: 计算机科学技术 软件工程
 
-## Pastimes and Activities
+## 消遣和活动
 
-- I love new tech, tried chatgpt, threejs.
-- I love outdoor activities (fitness, basketball, swimming...)
-- I like video games, such as God of War series, Zelda series, Elden Ring.
+- 我喜欢尝鲜新技术，比如最近的chatgpt，还学习了下threejs，略懂皮毛.
+- 我喜欢健身，篮球，游泳。I love outdoor activities (fitness, basketball, swimming...)
+- 我喜欢打游戏，比如战神系列，塞尔达系列，老头环.
 
 ---
 
-Last updated: June 2023
+最近更新时间: 2023-06

@@ -1,6 +1,7 @@
 {
-  "blog": "Blog",
-  "tags": "Tags",
-  "projects": "Projets",
-  "about": "À Propos"
+  "Blog": "博客",
+  "Tags": "标签",
+  "Projects": "项目",
+  "About": "关于",
+  "Resume": "简历"
 }

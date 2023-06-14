@@ -6,17 +6,10 @@ import Image from '@/components/Image'
 import Tag from '@/components/Tag'
 import siteMetadata from '@/data/siteMetadata'
 import useTranslation from 'next-translate/useTranslation'
-import { formatDate2 } from '@/lib/utils/formatDate'
-import { useRouter } from 'next/router'
+import formatDate from '@/lib/utils/formatDate'
 import ScrollTopAndComment from '@/components/ScrollTopAndComment'
 
 const editUrl = (fileName) => `${siteMetadata.siteRepo}/blob/master/data/blog/${fileName}`
-const discussUrl = (slug) =>
-  `https://mobile.twitter.com/search?q=${encodeURIComponent(
-    `${siteMetadata.siteUrl}/blog/${slug}`
-  )}`
-
-const postDateTemplate = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }
 
 export default function PostLayout({
   frontMatter,
@@ -27,8 +20,7 @@ export default function PostLayout({
   children,
 }) {
   const { t } = useTranslation()
-  const { locale } = useRouter()
-  const { slug, fileName, date, title, images, tags } = frontMatter
+  const { slug, fileName, date, title, tags } = frontMatter
 
   return (
     <SectionContainer>
@@ -47,7 +39,7 @@ export default function PostLayout({
                 <div>
                   <dt className="sr-only">{t('common:pub')}</dt>
                   <dd className="text-base font-medium leading-6 text-gray-500 dark:text-gray-400">
-                    <time dateTime={date}>{formatDate2(new Date(date))}</time>
+                    <time dateTime={date}>{formatDate(new Date(date))}</time>
                   </dd>
                 </div>
               </dl>
@@ -98,10 +90,6 @@ export default function PostLayout({
             <div className="divide-y divide-gray-200 dark:divide-gray-700 xl:col-span-3 xl:row-span-2 xl:pb-0">
               <div className="prose max-w-none pt-10 pb-8 dark:prose-dark">{children}</div>
               <div className="pt-6 pb-6 text-sm text-gray-700 dark:text-gray-300">
-                <Link href={discussUrl(slug)} rel="nofollow">
-                  {t('common:twitter')}
-                </Link>
-                {` • `}
                 <Link href={editUrl(fileName)}>{t('common:github')}</Link>
               </div>
               {/* <Comments frontMatter={frontMatter} /> */}
@@ -111,7 +99,7 @@ export default function PostLayout({
                 {tags && (
                   <div className="py-4 xl:py-8">
                     <h2 className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                      Tags
+                    {t('common:tags')}
                     </h2>
                     <div className="flex flex-wrap">
                       {tags.map((tag) => (

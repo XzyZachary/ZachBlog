@@ -1,30 +1,21 @@
-import '@/css/tailwind.css'
-import '@/css/prism.css'
-import '@/css/twemoji.css'
-import 'katex/dist/katex.css'
-// import '@/css/docsearch.css' // Uncomment if using algolia docsearch
-// import '@docsearch/css' // Uncomment if using algolia docsearch
-import '@/css/extra.css'
-import { ThemeProvider } from 'next-themes'
-import type { AppProps } from 'next/app'
-import Head from 'next/head'
+import 'css/tailwind.css'
+import 'css/twemoji.css'
+import 'css/extra.css'
 
-import siteMetadata from '@/data/siteMetadata'
-import { Analytics } from 'pliny/analytics'
-import { SearchProvider } from 'pliny/search'
+import { ThemeProvider } from 'next-themes'
+import Head from 'next/head'
+// import { Analytics } from '@/components/analytics'
 import LayoutWrapper from '@/components/LayoutWrapper'
 
-export default function App({ Component, pageProps }: AppProps) {
+export default function App({ Component, pageProps }) {
   return (
-    <ThemeProvider attribute="class" defaultTheme={siteMetadata.theme}>
+    // @ts-ignore
+    <ThemeProvider attribute="class">
       <Head>
         <meta content="width=device-width, initial-scale=1" name="viewport" />
       </Head>
-      <Analytics analyticsConfig={siteMetadata.analytics} />
       <LayoutWrapper>
-        {/* <SearchProvider searchConfig={siteMetadata.search}> */}
-          <Component {...pageProps} />
-        {/* </SearchProvider> */}
+        <Component {...pageProps} />
       </LayoutWrapper>
     </ThemeProvider>
   )
