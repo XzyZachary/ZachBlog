@@ -10,9 +10,9 @@ import rehypeSlug from 'rehype-slug'
 import remarkGFM from 'remark-gfm'
 import { visit } from 'unist-util-visit'
 import { TOKEN_CLASSNAME_MAP } from '@/constant'
-import type { BlogFrontMatter, MdxFileData, MdxFrontMatter, TOC, UnistNodeType } from '@/types'
+import type { MdxFileData, MdxFrontMatter, TOC, UnistNodeType } from '@/types'
 import { dateSortDesc } from '@/utils/date'
-import { formatSlug, getAllFilesRecursively } from './files'
+import { getAllFilesRecursively } from './files'
 import { remarkCodeBlockTitle } from './remark-code-block-title'
 import { remarkImgToJsx } from './remark-img-to-jsx'
 import { remarkTocHeading } from './remark-toc-heading'
@@ -29,6 +29,12 @@ export function getFiles(type, otherLocale = '') {
 
   // Only want to return blog/path and ignore root, replace is needed to work on Windows
   return files.map((file) => file.slice(prefixPaths.length + 1).replace(/\\/g, '/'))
+}
+
+export function formatSlug(slug) {
+  // return slug.replace(/\.(mdx|md)/, '')
+  // take the main root of slug e.g. post-name in post-name.en.mdx
+  return slug.split('.')[0]
 }
 
 export async function getFileBySlug(type: string, slug: string,  otherLocale = ''): Promise<MdxFileData> {
@@ -117,14 +123,19 @@ export async function getFileBySlug(type: string, slug: string,  otherLocale = '
   }
 }
 
-export function getAllFilesFrontMatter(folder: string, otherLocale) {
-  const root = process.cwd()
+
+// otherLocale === locale if locale !== defaultLocale
+export async function getAllFilesFrontMatter(folder, otherLocale) {
   const prefixPaths = path.join(root, 'data', folder)
+
   const files =
     otherLocale === ''
       ? getAllFilesRecursively(prefixPaths).filter((path) => (path.match(/\./g) || []).length === 1)
       : getAllFilesRecursively(prefixPaths).filter((path) => path.includes(`.${otherLocale}.md`))
-  const allFrontMatter: BlogFrontMatter[] = []
+
+  // Check if the file exist in the otherlocale. If not, fallback to defaultLangage
+
+  const allFrontMatter = []
 
   files.forEach((file) => {
     // Replace is needed to work on Windows
@@ -134,10 +145,13 @@ export function getAllFilesFrontMatter(folder: string, otherLocale) {
       return
     }
     const source = fs.readFileSync(file, 'utf8')
-    const grayMatterData = matter(source)
-    const data = grayMatterData.data as BlogFrontMatter
-    if (data.draft !== true) {
-      allFrontMatter.push({ ...data, slug: formatSlug(fileName) })
+    const { data: frontmatter } = matter(source)
+    if (frontmatter.draft !== true) {
+      allFrontMatter.push({
+        ...frontmatter,
+        slug: formatSlug(fileName),
+        date: frontmatter.date ? new Date(frontmatter.date).toISOString() : null,
+      })
     }
   })
 

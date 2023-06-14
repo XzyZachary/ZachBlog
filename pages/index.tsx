@@ -7,26 +7,29 @@ import { BlogLinks } from '@/components/homepage/BlogLinks'
 import { TypedBios } from '@/components/homepage/TypedBios'
 import { Greeting } from '@/components/homepage/Greeting'
 import Heading from '@/components/homepage/Heading'
+import { getAllFilesFrontMatter } from '@/lib/mdx'
 import ProfileCard from '@/components/ProfileCard'
-import { allBlogs } from 'contentlayer/generated'
 import { useRouter } from 'next/router'
 import { FeaturedPosts } from '@/components/homepage/FeaturedPosts'
 import type { Blog } from 'contentlayer/generated'
 import useTranslation from 'next-translate/useTranslation'
 
 
-export const getStaticProps = async () => {
+export const getStaticProps = async ({ locale, defaultLocale, locales }) => {
+  const otherLocale = locale !== defaultLocale ? locale : ''
+  const allBlogs = await getAllFilesFrontMatter('blog', otherLocale)
   const sortedPosts = sortedBlogPost(allBlogs) as Blog[]
   const posts = allCoreContent(sortedPosts)
-  return { props: { posts } }
+  return { props: { posts, availableLocales: locales } }
 }
 
-export default function Home({ posts }: InferGetStaticPropsType<typeof getStaticProps>) {
+export default function Home({ posts, availableLocales }: InferGetStaticPropsType<typeof getStaticProps>) {
   const router = useRouter()
   const { t } =  useTranslation()
   return (
     <>
-      <PageSEO title={siteMetadata.title[router.locale]} description={siteMetadata.description[router.locale]} />
+      <PageSEO title={siteMetadata.title[router.locale]} description={siteMetadata.description[router.locale]} 
+        availableLocales={availableLocales} />
       <div className="mt-8 divide-y divide-gray-200 dark:divide-gray-700 md:mt-16">
         <div className="space-y-2 md:my-4 md:space-y-5 md:pb-8 md:pt-6 xl:grid xl:grid-cols-3">
           <div className="md:pr-8 xl:col-span-2">

@@ -9,8 +9,6 @@ const Header = () => {
   const { t } = useTranslation()
   const router = useRouter()
   const { locale, locales, defaultLocale } = router
-  console.log(33, locale, locales)
-
   const changeLanguage = (e) => {
     const locale = e.target.value
     router.push(router.asPath, router.asPath, { locale })

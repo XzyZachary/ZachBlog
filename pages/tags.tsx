@@ -3,13 +3,15 @@ import { PageSEO } from '@/components/SEO'
 import Tag from '@/components/Tag'
 import siteMetadata from '@/data/siteMetadata'
 import { kebabCase } from 'pliny/utils/kebabCase'
-import { getAllTags } from 'pliny/utils/contentlayer'
 import { GetStaticProps, InferGetStaticPropsType } from 'next'
-import { allBlogs } from 'contentlayer/generated'
+import { getAllTags } from '@/lib/tags'
 import { useRouter } from 'next/router'
 
-export const getStaticProps: GetStaticProps<{ tags: Record<string, number> }> = async () => {
-  const tags = await getAllTags(allBlogs)
+export const getStaticProps: GetStaticProps<{ tags: Record<string, number> }> = async ({ defaultLocale, locale, locales }) => {
+  const otherLocale = locale !== defaultLocale ? locale : ''
+  const tags = await getAllTags('blog', otherLocale)
+
+  return { props: { tags, locale, availableLocales: locales } }
 
   return { props: { tags } }
 }

@@ -26,8 +26,9 @@ export default function Blog({ posts, initialDisplayPosts, pagination, locale, a
   return (
     <>
       <PageSEO
-        title={`Blog - ${siteMetadata.author}`}
+        title={`Blog - ${siteMetadata.author[locale]}`}
         description={siteMetadata.description[locale]}
+        availableLocales={availableLocales}
       />
       <ListLayout
         posts={posts}

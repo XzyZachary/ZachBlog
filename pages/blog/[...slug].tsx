@@ -2,8 +2,7 @@ import fs from 'fs'
 import PageTitle from '@/components/PageTitle'
 import generateRss from '@/lib/generate-rss'
 import { MDXLayoutRenderer } from '@/components/MDXComponents'
-import { getAllFilesFrontMatter, getFileBySlug, getFiles } from '@/lib/mdx'
-import { formatSlug } from '@/lib/files'
+import { formatSlug, getAllFilesFrontMatter, getFileBySlug, getFiles } from '@/lib/mdx'
 
 const DEFAULT_LAYOUT = 'PostLayout'
 
@@ -15,14 +14,15 @@ export async function getStaticPaths({ locales, defaultLocale }) {
       return posts.map((post) => [post, locale])
     })
     .flat()
-
   return {
-    paths: localesPost.map(([p, l]) => ({
-      params: {
-        slug: formatSlug(p).split('/'),
-      },
-      locale: l,
-    })),
+    paths: localesPost.map(([p, l]) => {
+      return {
+        params: {
+          slug: formatSlug(p).split('/'),
+        },
+        locale: l,
+      }
+    }),
     fallback: false,
   }
 }
