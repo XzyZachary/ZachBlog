@@ -2,12 +2,16 @@ import { useEffect, useRef } from 'react'
 import Typed from 'typed.js'
 import useTranslation from 'next-translate/useTranslation'
 import { Twemoji } from '../Twemoji'
+import { useRouter } from 'next/router'
 
 export function TypedBios() {
   const el = useRef(null)
   const { t } = useTranslation()
   const typed = useRef(null)
+  const router = useRouter()
+  const { locale } = router
   useEffect(() => {
+    // 修复切换语言 type还好之前语言模式
     typed.current = new Typed(el.current, {
       stringsElement: '#bios',
       typeSpeed: 40,
@@ -16,7 +20,7 @@ export function TypedBios() {
       backDelay: 1000,
     })
     return () => typed.current.destroy()
-  }, [])
+  }, [locale])
 
   return (
     <div>
