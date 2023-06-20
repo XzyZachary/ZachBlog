@@ -12,6 +12,12 @@ const projectsData =  {
       imgSrc: '/static/images/indexdb.png',
       href: 'https://github.com/XzyZachary/IDB-Promise',
     },
+    {
+      title: 'SSG Generate',
+      description: `Static pages are automatically generated.`,
+      imgSrc: '/static/images/nuxt.png',
+      href: 'https://github.com/XzyZachary/ssg-generate',
+    },
   ],
   cn: [
     {
@@ -25,6 +31,12 @@ const projectsData =  {
       description: `一个轻量级indexdb promise化.`,
       imgSrc: '/static/images/indexdb.png',
       href: 'https://github.com/XzyZachary/IDB-Promise',
+    },
+    {
+      title: 'SSG Generate',
+      description: `静态页面自动化生成.`,
+      imgSrc: '/static/images/nuxt.png',
+      href: 'https://github.com/XzyZachary/ssg-generate',
     },
   ]
 }
