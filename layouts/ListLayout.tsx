@@ -16,8 +16,8 @@ interface ListProps {
 export default function ListLayout({ posts, title, initialDisplayPosts = [], pagination }: ListProps) {
   const [searchValue, setSearchValue] = useState('')
   const filteredBlogPosts = posts.filter((frontMatter) => {
-    const searchContent = frontMatter.title + frontMatter.summary + frontMatter.tags.join(' ')
-    return searchContent.toLowerCase().includes(searchValue.toLowerCase())
+    const searchContent = frontMatter.title + frontMatter.summary + frontMatter?.tags?.join(' ')
+    return searchContent?.toLowerCase().includes(searchValue.toLowerCase())
   })
 
   const { t } = useTranslation()

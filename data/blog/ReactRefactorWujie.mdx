@@ -1,0 +1,90 @@
+---
+title: 'Refactoring Old React Project To Wujie'
+date: '2025-09-28'
+tags: ['React', 'Wujie']
+draft: false
+summary: 'Refactoring Old React Project To Wujie'
+---
+# Micro-Frontend Evolution: Rebuilding From iframe to Wujie
+
+## Background
+
+Core hosts more than ten business modules. In the early days, we used iframes to embed independent subsystems quickly. As the product grew, the iframe approach started showing serious weaknesses:
+
+- Routing and state often fell out of sync; cross-module navigation frequently triggered full-page reloads.
+- DOM/CSS tweaks had to be injected manually for each scenario—mobile, dialogs, sidebars—leading to endless hacks.
+- Security headers (tfsgv, JSEncrypt) were injected ad hoc in every iframe, making governance difficult.
+- Loading, timeout handling, and exception UX were all tangled in one giant component, driving up maintenance cost.
+
+## Legacy Implementation: A Powerful but Bloated SubWindow
+
+`src/components/functions/subWindow/SubWindow.tsx` renders each subsystem via `<iframe>`:
+
+- **Communication**: It exposes `window._client`/`historyPush`, manually parses routes, and keeps the host menu in sync—a high-coupling design.
+- **UI Manipulation**: Direct DOM scripting inside the iframe hides sidebars, overrides backgrounds, and adjusts `z-index`; mobile mode even uses `MutationObserver`.
+- **Security Injection**: On iframe load, scripts rewrite XHR/FETCH to add tfsgv, each page duplicating the logic.
+- **Exception Handling**: Loading states, 10-second timeouts, and modal prompts are all managed inside the component.
+- **Compatibility Layer**: Extra code adapts Angular-era breadcrumbs, `?_timestamp`, `fc` params, etc.
+
+It works, but the component shoulders every responsibility, making evolution painful.
+
+## New Architecture: Wujie-Powered Container
+
+The new implementation in `src/components/new/wujie/` embraces a “container component + plugin chain + Redux cooperation” pattern.
+
+### 1. Lightweight Container (`index.tsx`)
+
+- Uses `WujieReact` to render sub apps, supporting `alive` (keep-alive) and `reload`.
+- Leverages Wujie’s event bus:
+  - `sub-route-change`: reads `functionNameMap` to auto-fill tab names, i18n text, and detail suffixes.
+  - `sub-route-replace`: updates Redux `tabs/currTab` and `history.push` for seamless replacements.
+- Exposes `props2.jump` so sub apps can trigger host routing via props instead of global variables.
+
+### 2. Controlled Lifecycle (`wujie.tsx`)
+
+- Delegates `startApp/destroyApp` to `wujie`; `window.__WUJIE_QUEUE` ensures ordered loading for same-name apps.
+- `reload` tears down and restarts the sandbox with clean state.
+- The component renders only a div container—no direct iframe manipulation.
+
+### 3. Unified Plugin Chain (`plugin.ts`)
+
+- Pulls in `wujie-polyfill` to support Selection, Fullscreen, WindowMessage, etc., inside the sandbox.
+- Custom plugins inject `jsencrypt.min.js`, tfsgv headers, and intercept `window.open`—all defined once, reused everywhere.
+- CSS plugins inject tweaks (e.g., `.ant-layout-sider{display:none}`) before any child styles load, eliminating imperative DOM hacks.
+
+### 4. Redux & Event-Driven Coordination
+
+- `useTabsMenu` handles tab creation/naming; Wujie simply emits events.
+- Redux becomes the single source of truth for menu/tabs, boosting observability and consistency.
+
+## Architecture Comparison
+
+| Aspect | iframe Approach | Wujie Approach |
+| --- | --- | --- |
+| Route Sync | Global `window` helpers; frequent full reloads | Event bus + Redux/Router, no refresh |
+| DOM/CSS | `querySelector` + style overrides | Configurable plugin injection |
+| Security | Per-iframe scripts, duplicated | Centralized plugin chain |
+| Code Structure | One component owns everything | Container/plugin/Redux separation |
+| Extensibility | Copy massive template per module | Configure `name/url/props` only |
+| UX | Flashing screens, inconsistent tabs | Smooth switching, aligned tabs |
+
+## Migration Strategy & Lessons
+
+1. **Dual Directory**: Legacy code stays in `components/functions`; new container lives in `components/new` for incremental rollout.
+2. **functionNameMap Compatibility**: Continue using `sessionStorage.functionNameMap` to keep menu names consistent during transition.
+3. **Event Protocol**: Sub apps gradually replace `window.historyPush` with `window.$wujie.bus.$emit(...)`.
+4. **Plugin Governance**: Centralize security and UI patches in plugins for unified upgrades.
+
+## Benefits & Next Steps
+
+- **Experience**: Route transitions feel native; tabs stay synchronized without flashing.
+- **Velocity**: Onboarding new subsystems is far simpler; QA handoffs shrink.
+- **Governance**: Security injections and polyfills are centralized and auditable.
+
+Upcoming work:
+
+- Provide onboarding scaffolds that standardize bus events and lifecycle hooks.
+- Move functionNameMap/menu metadata into a backend config service.
+- Add instrumentation for bus events and plugin execution to diagnose sub-app issues quickly.
+
+Switching to Wujie is more than replacing iframes—it turns our micro-frontend container into a configurable, observable, and evolvable platform. Hopefully, these lessons help guide future architecture upgrades.

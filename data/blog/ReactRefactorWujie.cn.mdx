@@ -1,0 +1,146 @@
+---
+title: 'React老项目接入Wujie'
+date: '2025-09-28'
+tags: ['React', 'Wujie']
+draft: false
+summary: 'React老项目接入Wujie'
+---
+
+# 微前端演进记：从 iframe 到 Wujie 的重构实践
+
+## 背景
+
+Core 承载几十余个业务模块，早期用 iframe 快速装载各子系统。但随着规模扩大，iframe 模式的问题逐渐暴露：
+
+- 路由与状态难同步，跨模块跳转常全页刷新。
+- DOM/CSS 需手动“整容”，移动端、弹窗场景频繁 hack。
+- 安全注入（tfsgv header、JSEncrypt）分散在各 iframe onLoad，难统一治理。
+- loading、超时、异常交互混杂在一个巨型组件中，维护成本高。
+
+## 旧方案：全能但臃肿的 SubWindow
+
+`src/components/functions/subWindow/SubWindow.tsx` 通过 `<iframe>` 渲染子系统：
+
+- **通信**：`window._client`、`historyPush` 手动解析路由，高耦合。
+- **UI 调整**：直接操作 iframe DOM，隐藏侧栏、覆写背景、监听 z-index。
+- **安全注入**：onLoad 时插入脚本，重写 XHR/FETCH 注入 tfsgv。
+- **异常处理**：在组件内维护 loading、超时、Modal。
+- **兼容层**：适配 Angular 老项目的 `?_timestamp`、`fc` 参数等。
+
+优点是“能跑”，缺点是“全靠堆”，职责混乱，代码极难演进。
+
+## 新方案：Wujie 驱动的组件化容器
+
+重构后在 `src/components/new/wujie/` 形成“容器组件 + 插件链 + Redux 协同”的架构。
+
+### 1. 轻量容器 `index.tsx`
+
+- 通过 `WujieReact` 渲染子应用，支持保活 (`alive`)、热刷新 (`reload`)。
+- 利用 Wujie bus：
+  - `sub-route-change`：根据 `functionNameMap` 自动补齐 tab 名、国际化、详情态。
+  - `sub-route-replace`：同步 Redux `tabs/currTab` 与 `history.push`，实现无刷新替换。
+- 通过 `props2.jump` 将主应用路由能力以 props 提供给子项目，避免全局变量。
+
+### 2. `WujieReact` 生命周期可控
+
+- `startApp/destroyApp` 由 `wujie` 接管，`window.__WUJIE_QUEUE` 确保同名实例顺序加载。
+- `reload` 时自动销毁并重新启动子应用，沙箱环境更纯净。
+- DOM 只负责挂载 div 容器，职责清晰。
+
+### 3. 插件链统一治理
+
+`plugin.ts` 把安全、兼容、UI 改造集中到一个配置数组中：
+
+- 引入 `wujie-polyfill` 以支持 Selection/Fullscreen/WindowMessage 等 API。
+- 自定义插件统一注入 `jsencrypt.min.js`、tfsgv header、拦截 `window.open` 等逻辑。
+- CSS 插件在加载前统一写入 `.ant-layout-sider{display:none}` 等样式，无需 iframe DOM 操作。
+
+### 4. Redux + 事件驱动协同
+
+- `useTabsMenu` hook 负责 tab 增删与命名，Wujie 只发事件，不碰业务。
+- Redux state 成为主应用与子应用共享的唯一真相，提高一致性和可观测性。
+
+## 架构对比
+
+| 维度 | iframe 方案 | Wujie 方案 |
+| --- | --- | --- |
+| 路由同步 | 全局 `window` 手动解析，常整页刷新 | bus 事件驱动，Redux + Router 局部更新 |
+| DOM/CSS | `querySelector` + style hack | 插件链前置注入，配置化治理 |
+| 安全注入 | onLoad 手写脚本、重复度高 | 插件统一注入，可复用、可测试 |
+| 代码结构 | 单组件承载所有职责，难维护 | 容器/插件/Redux 各司其职 |
+| 扩展性 | 接入新模块需复制大量模版 | 只需配置 `name/url/props` 即插即用 |
+| 体验 | 跳转闪屏、Tab 不一致 | 无刷新切换、Tab 自动对齐 |
+
+## 迁移策略与经验
+
+1. **目录双轨**：旧组件留在 `components/functions`，新容器放到 `components/new`，可逐模块迁移。
+2. **兼容 functionNameMap**：继续复用 sessionStorage 配置，平滑过渡。
+3. **事件协议**：子项目逐步替换 `window.historyPush` 为 `window.$wujie.bus.$emit(...)`。
+4. **插件治理**：安全策略、UI 补丁集中在 plugin，便于统一升级与排障。
+
+## 挑战与困难
+
+### 1. `window.open` 的跳转
+
+- **挑战**：子项目调用 `window.open` 时会新开窗口，新版过后并不希望新开的是浏览器的tab，而是内部的tab。
+- **思考**：如何最小改动下实现方案，注册事件？ 修改window.open方法？
+- **解决方案**：在 `plugin.ts` 中重写 `window.open`，只对非白名单地址bus.$on注册事件，随后触发 `bus.$emit("sub-route-change")`，其他情况回落原生 `window.open`。必要时为子项目提供 `props.jump`。
+
+```
+jsBeforeLoaders: [
+      {
+        content: `var originalWindowOpen = window.open; 
+        window.open = (url, windowName, windowFeatures) => {
+          if (!["whiteList"].some(item => url.includes(item))) {
+           window.$wujie.bus.$emit("sub-route-change", "windowOpen路径", url);
+          } else {
+           originalWindowOpen(url, windowName, windowFeatures);
+          }
+        };`,
+      },
+]
+```
+
+### 2. 子应用 DOM Hack
+
+- **挑战**：历史框架，是iframe中嵌套的侧边栏，被主框架的侧边栏给覆盖的，所以视觉上没有侧边栏，但是迁移到新版本就会出现。
+- **思考**：如何最小改动？ 能否手动hack到webcomponent？ 如果无法解决？每个子项目只能根据参数控制侧边栏的显隐
+- **解决**：`cssBeforeLoaders` 统一维护，避免子项目再手动改 DOM。
+``` 
+cssBeforeLoaders: [
+      //在加载html所有的样式之前添加一个内联样式
+      { content: ".ant-layout-sider{display:none}" },
+      {
+        content:
+          "[class*='drawer_isFullDrawer'] { .ant-drawer-content-wrapper { width: 100% !important;}}",
+      },
+      // { content: "html{padding-top: 70px;height:100%}" },
+]
+```
+
+### 3. DLL报错
+
+- **挑战**： Uncaught ReferenceError: _dll_bundle_  is not defined
+- **思考**：猜测是子项目中的dll变量在iframe中，导致外部webcomponet的时候没有拿到
+- **解决**：比较骚的解决方案就是把dll的挂载到全局
+``` 
+jsLoader: (code: any, url: any) => {
+  if (url.includes("bundle.dll.js"))
+    return code.replace("var _dll_bundle", "window._dll_bundle");
+  return code;
+}
+```
+
+## 收益与下一步
+
+- **体验提升**：路由切换丝滑、Tab 状态一致，跨模块无闪屏。
+- **开发提效**：接入成本大幅下降，联调简单。
+- **治理能力**：安全注入、Polyfill 集中管理，可持续演进。
+
+后续计划：
+
+- 提供接入脚手架，规范 bus 事件与生命周期。
+- 将 functionNameMap 等配置上收至服务端/配置中心。
+- 对 bus 事件与插件执行增加埋点监控，快速定位子应用异常。
+
+围绕 Wujie 的重构，不只是替换 iframe，更是把“微前端容器”从散乱脚本升级为可配置、可观测、可演进的平台。希望这次实践能为团队未来的架构升级提供借鉴。
