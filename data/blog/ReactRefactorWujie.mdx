@@ -5,6 +5,7 @@ tags: ['React', 'Wujie']
 draft: false
 summary: 'Refactoring Old React Project To Wujie'
 ---
+
 # Micro-Frontend Evolution: Rebuilding From iframe to Wujie
 
 ## Background
@@ -20,29 +21,29 @@ Core hosts more than ten business modules. In the early days, we used iframes to
 
 `src/components/functions/subWindow/SubWindow.tsx` renders each subsystem via `<iframe>`:
 
-- **Communication**: It exposes `window._client`/`historyPush`, manually parses routes, and keeps the host menu in sync—a high-coupling design.
+- **Communication**: It exposes `window._client` / `historyPush`, manually parses routes, and keeps the host menu in sync—a high-coupling design.
 - **UI Manipulation**: Direct DOM scripting inside the iframe hides sidebars, overrides backgrounds, and adjusts `z-index`; mobile mode even uses `MutationObserver`.
 - **Security Injection**: On iframe load, scripts rewrite XHR/FETCH to add tfsgv, each page duplicating the logic.
 - **Exception Handling**: Loading states, 10-second timeouts, and modal prompts are all managed inside the component.
 - **Compatibility Layer**: Extra code adapts Angular-era breadcrumbs, `?_timestamp`, `fc` params, etc.
 
-It works, but the component shoulders every responsibility, making evolution painful.
+It works, but everything is bolted on: responsibilities blur, the code is hard to evolve, iframes pull in full resource trees, and first paint stays relatively slow.
 
 ## New Architecture: Wujie-Powered Container
 
-The new implementation in `src/components/new/wujie/` embraces a “container component + plugin chain + Redux cooperation” pattern.
+The new implementation in `src/components/new/wujie/` follows a “container component + plugin chain + Redux cooperation” pattern.
 
 ### 1. Lightweight Container (`index.tsx`)
 
 - Uses `WujieReact` to render sub apps, supporting `alive` (keep-alive) and `reload`.
 - Leverages Wujie’s event bus:
   - `sub-route-change`: reads `functionNameMap` to auto-fill tab names, i18n text, and detail suffixes.
-  - `sub-route-replace`: updates Redux `tabs/currTab` and `history.push` for seamless replacements.
+  - `sub-route-replace`: updates Redux `tabs` / `currTab` and `history.push` for seamless replacements.
 - Exposes `props2.jump` so sub apps can trigger host routing via props instead of global variables.
 
 ### 2. Controlled Lifecycle (`wujie.tsx`)
 
-- Delegates `startApp/destroyApp` to `wujie`; `window.__WUJIE_QUEUE` ensures ordered loading for same-name apps.
+- Delegates `startApp` / `destroyApp` to `wujie`; `window.__WUJIE_QUEUE` ensures ordered loading for same-name apps.
 - `reload` tears down and restarts the sandbox with clean state.
 - The component renders only a div container—no direct iframe manipulation.
 
@@ -50,12 +51,12 @@ The new implementation in `src/components/new/wujie/` embraces a “container co
 
 - Pulls in `wujie-polyfill` to support Selection, Fullscreen, WindowMessage, etc., inside the sandbox.
 - Custom plugins inject `jsencrypt.min.js`, tfsgv headers, and intercept `window.open`—all defined once, reused everywhere.
-- CSS plugins inject tweaks (e.g., `.ant-layout-sider{display:none}`) before any child styles load, eliminating imperative DOM hacks.
+- CSS plugins inject tweaks (e.g. `.ant-layout-sider{display:none}`) before any child styles load, replacing imperative DOM hacks.
 
 ### 4. Redux & Event-Driven Coordination
 
-- `useTabsMenu` handles tab creation/naming; Wujie simply emits events.
-- Redux becomes the single source of truth for menu/tabs, boosting observability and consistency.
+- `useTabsMenu` handles tab creation and naming; Wujie only emits events and stays out of business rules.
+- Redux is the single source of truth for host and sub-app menu/tab state, improving observability and consistency.
 
 ## Architecture Comparison
 
@@ -64,16 +65,77 @@ The new implementation in `src/components/new/wujie/` embraces a “container co
 | Route Sync | Global `window` helpers; frequent full reloads | Event bus + Redux/Router, no refresh |
 | DOM/CSS | `querySelector` + style overrides | Configurable plugin injection |
 | Security | Per-iframe scripts, duplicated | Centralized plugin chain |
-| Code Structure | One component owns everything | Container/plugin/Redux separation |
-| Extensibility | Copy massive template per module | Configure `name/url/props` only |
+| Code Structure | One component owns everything | Container / plugin / Redux separation |
+| Extensibility | Copy massive template per module | Configure `name` / `url` / `props` only |
 | UX | Flashing screens, inconsistent tabs | Smooth switching, aligned tabs |
 
 ## Migration Strategy & Lessons
 
-1. **Dual Directory**: Legacy code stays in `components/functions`; new container lives in `components/new` for incremental rollout.
-2. **functionNameMap Compatibility**: Continue using `sessionStorage.functionNameMap` to keep menu names consistent during transition.
-3. **Event Protocol**: Sub apps gradually replace `window.historyPush` with `window.$wujie.bus.$emit(...)`.
-4. **Plugin Governance**: Centralize security and UI patches in plugins for unified upgrades.
+1. **Dual directory**: Legacy code stays in `components/functions`; the new container lives in `components/new` for incremental rollout.
+2. **functionNameMap compatibility**: Keep using `sessionStorage.functionNameMap` so menu names stay consistent during transition.
+3. **Event protocol**: Sub apps gradually replace `window.historyPush` with `window.$wujie.bus.$emit(...)`.
+4. **Plugin governance**: Centralize security and UI patches in plugins for unified upgrades and troubleshooting.
+
+## Challenges
+
+### 1. `window.open` navigation
+
+- **Challenge**: Sub apps that call `window.open` spawn new browser tabs; after the redesign we prefer internal tabs instead of new browser tabs.
+- **Approach**: Minimize business churn—register events, or patch `window.open`?
+- **Solution**: In `plugin.ts`, override `window.open`. For URLs not on the allowlist, emit on the bus and route via `bus.$emit("sub-route-change", ...)`, then fall back to the native `window.open` elsewhere. Expose `props.jump` when sub apps need an explicit escape hatch.
+
+```javascript
+jsBeforeLoaders: [
+  {
+    content: `var originalWindowOpen = window.open;
+window.open = (url, windowName, windowFeatures) => {
+  if (!["whiteList"].some(item => url.includes(item))) {
+    window.$wujie.bus.$emit("sub-route-change", "windowOpen路径", url);
+  } else {
+    originalWindowOpen(url, windowName, windowFeatures);
+  }
+};`,
+  },
+]
+```
+
+### 2. Sub-app DOM hacks
+
+- **Challenge**: Sidebars lived inside nested iframes and were visually covered by the host chrome, so they looked “invisible.” After migration, sidebars show up again.
+- **Approach**: Can we patch Web Components with minimal change? If not, do we push visibility flags into every sub app?
+- **Solution**: Centralize rules in `cssBeforeLoaders` so sub apps stop mutating DOM by hand.
+
+```javascript
+cssBeforeLoaders: [
+  // Inline styles injected before any HTML-linked styles
+  { content: ".ant-layout-sider{display:none}" },
+  {
+    content:
+      "[class*='drawer_isFullDrawer'] { .ant-drawer-content-wrapper { width: 100% !important;}}",
+  },
+  // { content: "html{padding-top: 70px;height:100%}" },
+]
+```
+
+### 3. DLL runtime error
+
+- **Challenge**: `Uncaught ReferenceError: _dll_bundle_ is not defined`.
+- **Hypothesis**: The DLL symbol used to live only inside the iframe sandbox; mounting as a Web Component broke the expected scope.
+- **Solution**: In `jsLoader`, rewrite `bundle.dll.js` to hang the bundle on `window` (blunt but effective—tighten per environment).
+
+```javascript
+jsLoader: (code: any, url: any) => {
+  if (url.includes("bundle.dll.js"))
+    return code.replace("var _dll_bundle", "window._dll_bundle");
+  return code;
+}
+```
+
+### 4. Many sub-app tabs → growing memory
+
+- **Challenge**: The product is tab-based; users can open many tabs in principle, and sub apps often run with `alive` keep-alive.
+- **Insight**: Keep-alive usually means one cached instance per sub app. The growth often looks like retention from isolation + caching, not a classic leak.
+- **Mitigation**: Use an LCU-style policy to reclaim memory for idle tabs and cap open tabs (e.g. 20). Calling `destroyApp` helps, but the drop is modest—we still saw on the order of ~2GB with 20 tabs, so we are continuing to profile and tune.
 
 ## Benefits & Next Steps
 
@@ -84,7 +146,7 @@ The new implementation in `src/components/new/wujie/` embraces a “container co
 Upcoming work:
 
 - Provide onboarding scaffolds that standardize bus events and lifecycle hooks.
-- Move functionNameMap/menu metadata into a backend config service.
+- Move functionNameMap / menu metadata into a backend config service.
 - Add instrumentation for bus events and plugin execution to diagnose sub-app issues quickly.
 
-Switching to Wujie is more than replacing iframes—it turns our micro-frontend container into a configurable, observable, and evolvable platform. Hopefully, these lessons help guide future architecture upgrades.
+Switching to Wujie is more than replacing iframes—it turns our micro-frontend container into a configurable, observable, and evolvable platform. Hopefully these lessons help guide future architecture upgrades.
