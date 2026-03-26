@@ -1,0 +1,41 @@
+---
+title: 'AI 阅读打卡 Day 1'
+date: '2026-03-26'
+tags: ['AI', 'Agent']
+draft: false
+summary: '第一篇《打造 Claude Code 的实践启示：Prompt 缓存决定一切》'
+---
+
+原文： https://x.com/trq212/status/2024574133011673516
+
+老话常说：“Cache Rules Everything Around Me”， 这句话同样适用Agents。
+
+像Claude Code这种长时间运行的agentic产品， 它能运行是因为提示缓存（prompt caching），这项技术可以允许我们重复使用的之前交互得出的计算结果，从而可以显著降低延迟和消费成本。
+
+什么是提示缓存（prompt caching）， 它是如何运行的，以及你如何技术上实现的可以看这篇文章[@RLanceMartin's piece on prompt caching and our new auto-caching launch.](https://x.com/RLanceMartin/status/2024573404888911886)
+
+在Claude Code中， 我们整个系统的设计都围绕着提示缓存这一核心展开。 
+
+一个高效的提示缓存命中率不仅可以减少成本，而且还可以为我们的订阅计划设定更宽松的速率限制标准， 所以我们对提示缓存命中率设置了监控告警，如果太低了，会宣布进入故障事件（SEV）处理流程。
+
+这些便是我们在大规模优化提示缓存过程中所领悟到的（往往不太直观的）经验教训。
+
+![thumbnail-image](/static/images/1.jpeg)
+
+制定缓存提示信息
+-----------------
+
+提示缓存通过前缀匹配来工作 -  API会缓存从请求开头到每一个cache_control块之间的请求内容。
+
+这意味着你处理事情的顺序至关重要，你要让尽可能多的请求享受同一个前缀。
+
+实现这个最好的方式就是 静态文件首先，动态内容最后。Claude Code就类似如下：
+
+1. 静态的系统提示 & 工具 （全局缓存）
+2. Claude的markdown （缓存在一个项目中）
+The best way to do this is static content first, dynamic content last. For Claude Code this looks like:
+
+1. Static system prompt & Tools (globally cached)
+2. Claude.MD (cached within a project)
+3. Session context (cached within a session)
+4. Conversation messages  
