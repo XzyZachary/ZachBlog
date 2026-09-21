@@ -1,0 +1,176 @@
+---
+title: 'AI Reading — Day 2'
+date: '2026-04-10'
+tags: ['AI', 'Agent']
+draft: false
+summary: 'Post 2《Introduction to Agents》'
+---
+
+Agent = LLM + Context + Tools
+-----------------
+
+An Agent has three core components: the LLM is the brain, context is the eyes, and tools are the hands and feet.
+
+1.  LLM: The entire decision-making core of the Agent — understanding intent, thinking and planning, making judgments. It is not just a collection of neurons like the human brain, but also a way of thinking shaped by experience. The capabilities of an LLM also come from two parts: the world knowledge and language ability accumulated during pre-training, and the decision-making strategies solidified during post-training — the latter involves specific techniques such as supervised fine-tuning (SFT) and reinforcement learning (RL).
+2.  Context: Not just the text fed to the model, but also the information form received and retained by the Agent at every decision point — observations from the environment, user memory, domain knowledge, its own state, and task progress.
+3.  Tools: The interfaces that an Agent uses to perceive or change the external world, including tool definitions, calling protocols, and adapters — ranging from predefined tool calls to dynamically generated code, from delegating to sub-agents for collaboration to proactively communicating with users.
+
+
+Tools: The Hands and Feet of the Agent
+-----------------
+
+Tools are the bridge through which an Agent interacts with the external world: perception tools carry observations from the environment to the Agent, while execution tools carry actions from the Agent to the environment.
+
+Perception tools let the Agent access information: search engines provide real-time web data, file systems read local documents, and APIs and databases connect to external services and core enterprise data.
+
+Execution tools let the Agent change the world: code execution, file operations, system commands, external API calls — decisions thereby become real actions.
+
+Collaboration tools let the Agent divide and cooperate with other Agents: delegating specialized tasks to sub-agents, requesting human confirmation at key decision points, or coordinating actions in multi-Agent systems.
+
+Event-triggered tools differ fundamentally from the previous three categories in how they are invoked — they are not actively called by the Agent, but serve as external inputs that drive the Agent to begin executing tasks.
+
+For example, receiving a new email, reaching a scheduled time point, or another system sending a Webhook callback — these events will activate the Agent and let it begin subsequent thinking and actions.
+
+Event adapters are likewise channels through which the Environment provides observations to the Agent, so this book classifies them into the broad tool system.
+
+Tool Calling (also known as Function Calling) is a core capability of modern LLM Agents. It allows the model to call external tools in a structured way.
+
+This capability transforms the LLM from a pure text generator into an intelligent system capable of executing real operations.
+
+The tool calling process is divided into four steps: first, tell the model which tools are available in the context; then, the model autonomously decides whether to call a tool, which one to call, and what parameters to pass; next, after the tool executes, the result is appended to the context; finally, the model decides the next action based on this — this loop is the foundation of ReAct.
+
+Taking a weather query scenario as an example, the simplified representation of the four-step process at the API level is as follows:
+
+```javascript
+Step 1: Declare the tool
+tools: [{
+    name: 'get_weather',
+    parameters: {
+        city: 'string',
+    }
+}]
+
+Step 2: The model decides to call
+assistant: {
+    tool_calls: [{
+        function: 'get_weather',
+        arguments: {
+            city: 'shanghai'
+        }
+    }]
+}
+
+Step 3: The result is appended to the context
+tool: {
+    tool_call_id: "call_1",
+    content: {
+        temperature: 25,
+        sky: 'sunny',
+    }
+}
+
+Step 4: The model replies based on the result
+assistant: {
+    content: 'The weather in Shanghai is sunny, with a temperature of 25 degrees'
+}
+```
+
+The core principle of tool design is: use basic capabilities for composition and exploration; use specialized tools to constrain high-risk and strong-business-rule operations.
+
+
+LLM: The Brain of the Agent
+-----------------
+
+The Model is the Agent: when the model itself becomes the product.
+
+The Agent's learning mechanism: from context adaptation to persistent updates.
+
+How does an Agent's behavior change?
+
+1.  In-task adaptation:
+    The main carriers are the current context (examples, state, retrieval results).
+    Update characteristics: instant, low-cost, not automatically preserved after the task ends.
+
+2.  External artifact updates:
+    The main carriers are knowledge, instructions, and procedures (documents, Prompt/Skill, Harness).
+    Update characteristics: persistent across tasks, auditable, relies on retrieval or tool calls.
+
+3.  Model parameter updates:
+    The main carriers are model weights, SFT, preference training, and RL.
+    Update characteristics: high-dimensional capabilities, broad generalization. Training and regression costs are relatively high.
+
+
+Context: The Eyes of the Agent
+-----------------
+
+Context is all the information the Agent can see at each decision point, just like a person making a decision needs to see all the materials spread out on the desk — task descriptions, reference manuals, prior communication records, and the latest data.
+
+The Agent's context window is its vision. From the API's perspective, the context for each LLM call consists of the following five parts:
+
+* System Prompt: Different from the prompt input by the user each time, the system prompt is written by the developer and remains unchanged throughout the entire conversation, equivalent to the Agent's job description — defining its identity, permissions, and behavioral rules.
+Through carefully designed system prompts via prompt engineering, we can shape the way the Agent works. The system prompt also contains user memory preserved across sessions and dynamically injected environment state.
+
+* Tool Definitions: Declare the names, function descriptions, and parameter formats of the tools available to the Agent. Without tool definitions, the Agent cannot identify and call any tools, but it will not stop because of this — ablation experiments will illustrate this. Tool definitions together with the system prompt form the static prefix that remains unchanged in the conversation.
+
+* User Messages: Coming from user input, user messages may also contain external support dynamically introduced through RAG — covering information after the training data cutoff or private domain knowledge.
+
+* Assistant Messages: The model's previously generated replies, containing at most three parts — reasoning process, text content, and tool call requests. In a specific reply, all three may not appear simultaneously: for example, when the Agent decides to call a tool, it usually only contains reasoning + tool_calls; when giving the final reply, it only contains content + reasoning.
+
+* Tool Results: The results returned by the Agent framework after executing tools. These results are the direct basis for the Agent's next thinking, and also let it learn from execution results and avoid repeating mistakes.
+
+The first two are the static prefix, and the last three are the dynamic message history that grows with interaction. These five parts together constitute the context for each LLM inference.
+
+To verify whether each component is indispensable, the most direct method is the Ablation Study: just as a doctor rules out causes one by one during each diagnosis — first remove component A to see if the system still works normally, then remove component B, and so on, thereby judging the contribution of each component.
+
+ReAct Loop
+-----------------
+
+The ReAct loop is the core mechanism that connects the LLM, context, and tools.
+
+The core pattern for an Agent to execute tasks is called ReAct (Reasoning + Acting).
+
+Each time the LLM is called, the complete context it receives consists of the static prefix and the trajectory, so the Agent's context = static prefix + trajectory.
+
+Let's first look at the minimum running skeleton. It explains how the mechanism runs: the Model is only responsible for deciding the next step, the Harness is responsible for assembling the context, verifying, and executing tools, and the Environment is responsible for producing real state changes and observations.
+
+
+The approximate steps are as follows:
+
+1.  The user wants to know about Bitcoin's trend over the past month
+2.  Think: need to search for real-time data, then use code to analyze
+3.  First round: call web_search
+4.  Get the result
+5.  Continue the next round with the observation results, ReAct loop, Res API path: Harness closed-loop execution
+6.  Second round: call code_interpreter
+7.  Final output: technical analysis
+
+Harness Engineering: Competitiveness Beyond the Model
+-----------------
+
+Agent = Model + Harness
+
+Harness = Context Management + Tool Interface + Constraints + Verification + Correction
+
+Harness is not everything outside the model, but the operation and governance layer within the boundary and outside the model.
+
+Chapter Summary
+-----------------
+
+This chapter starts from practice and establishes a basic framework for understanding and building AI Agents.
+
+Agent = Brain + Eyes + Hands and Feet: LLM is the brain (decision core), context is the eyes (determining what it can see), and tools are the hands and feet (determining what it can do). All three are indispensable.
+
+Extending the eyes and hands and feet is the most important capability lever: with a fixed model, redefining or expanding the observation space and action space — that is, extending context and tools — can often directly transform tasks that were originally unsolvable into solvable ones.
+The evolution of Manus and OpenClaw both shows that generality largely comes from the expansion of the interface boundary; this expansion must be carried out on demand and accompanied by permission control and verification.
+
+Eyes (context) are the decisive factor: context consists of the static prefix (system prompt + tool definitions) and the dynamic trajectory (message history). Ablation experiments show that the components are not equal: removing tool definitions or tool execution results will directly take away the ability to act and close the loop.
+The cost of removing the other two depends on whether the information can be reconstructed from the current observation. The essence of the ReAct loop is to continuously advance the task by continuously appending trajectories.
+
+Harness is where competitiveness lies: model capabilities are being commoditized, and the real difference lies in the Harness — the constraints, verification, and correction mechanisms built around context and tools, ensuring that the Agent "does things reliably."
+In production-grade Agent systems, the vast majority of the Harness code implements these guarantee mechanisms, not just context and tools themselves.
+
+From Workflow to Autonomous Agent: optimize the prompt first, then consider the workflow, and finally introduce the autonomous Agent — this is the most practical order to reduce unexpected risks. Each orchestration pattern has its applicable scenarios, and there is no universal optimal solution.
+
+Five design patterns run through the book: Proposer-Reviewer, Progressive Disclosure, Additive-Only, Boundary Set + Reserved Set, Minimum Diff + Rollback.
+
+Security is an architectural issue: security issues must be considered from the first line of code, not patched before launch. Guardrails are divided into three layers based on the difficulty of being bypassed: context layer, execution layer, and data layer. The security discussions in subsequent chapters all hang on this skeleton.
